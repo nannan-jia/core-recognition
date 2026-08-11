@@ -1,0 +1,141 @@
+{
+  "image": "ZK1024A-9.jpg",
+  "source": "C:/Users/Nan/Documents/GitHub/Core_recognition/Fracture/api_uploads/cf3c9f3c1e89/ZK1024A-9.jpg",
+  "row_count": 4,
+  "container_count": 1,
+  "status": "ok",
+  "detection": {
+    "method": "template_grid_score:grid_score+hdr:blue_end",
+    "confidence": 0.7609,
+    "estimated_rows": 4,
+    "mid_seam_y": null,
+    "scores_by_row_count": {
+      "4": 2.043,
+      "3": 1.858,
+      "5": 1.474
+    },
+    "divider_ys": [
+      85,
+      423,
+      772,
+      1102,
+      1449
+    ],
+    "title_y": 85
+  },
+  "image_size": {
+    "width": 3998,
+    "height": 1576
+  },
+  "groove_width_px": 3734,
+  "pitch_px": 341,
+  "pitch_over_width": 0.0913,
+  "target_pw": null,
+  "row_aspect_w_over_h": 14.362,
+  "inner_box": {
+    "left": 0.046023,
+    "top": 0.053934,
+    "right": 0.97999,
+    "bottom": 0.919416
+  },
+  "inner_box_px": {
+    "left": 184,
+    "top": 85,
+    "right": 3918,
+    "bottom": 1449,
+    "width": 3734,
+    "height": 1364,
+    "left_norm": 0.046023,
+    "top_norm": 0.053934,
+    "right_norm": 0.97999,
+    "bottom_norm": 0.919416
+  },
+  "box_bbox": {
+    "x": 184,
+    "y": 85,
+    "w": 3734,
+    "h": 1364
+  },
+  "rows": [
+    {
+      "index": 1,
+      "output_file": "row_01.jpg",
+      "y_top": 0.127538,
+      "y_bottom": 0.292513,
+      "x_left": 0.046023,
+      "x_right": 0.97999,
+      "crop_box": {
+        "left": 184,
+        "top": 201,
+        "right": 3918,
+        "bottom": 461,
+        "width": 3734,
+        "height": 260,
+        "left_norm": 0.046023,
+        "top_norm": 0.127538,
+        "right_norm": 0.97999,
+        "bottom_norm": 0.292513
+      }
+    },
+    {
+      "index": 2,
+      "output_file": "row_02.jpg",
+      "y_top": 0.33566,
+      "y_bottom": 0.494924,
+      "x_left": 0.046023,
+      "x_right": 0.97999,
+      "crop_box": {
+        "left": 184,
+        "top": 529,
+        "right": 3918,
+        "bottom": 780,
+        "width": 3734,
+        "height": 251,
+        "left_norm": 0.046023,
+        "top_norm": 0.33566,
+        "right_norm": 0.97999,
+        "bottom_norm": 0.494924
+      }
+    },
+    {
+      "index": 3,
+      "output_file": "row_03.jpg",
+      "y_top": 0.560279,
+      "y_bottom": 0.717005,
+      "x_left": 0.046023,
+      "x_right": 0.97999,
+      "crop_box": {
+        "left": 184,
+        "top": 883,
+        "right": 3918,
+        "bottom": 1130,
+        "width": 3734,
+        "height": 247,
+        "left_norm": 0.046023,
+        "top_norm": 0.560279,
+        "right_norm": 0.97999,
+        "bottom_norm": 0.717005
+      }
+    },
+    {
+      "index": 4,
+      "output_file": "row_04.jpg",
+      "y_top": 0.76269,
+      "y_bottom": 0.922589,
+      "x_left": 0.046023,
+      "x_right": 0.97999,
+      "crop_box": {
+        "left": 184,
+        "top": 1202,
+        "right": 3918,
+        "bottom": 1454,
+        "width": 3734,
+        "height": 252,
+        "left_norm": 0.046023,
+        "top_norm": 0.76269,
+        "right_norm": 0.97999,
+        "bottom_norm": 0.922589
+      }
+    }
+  ]
+}

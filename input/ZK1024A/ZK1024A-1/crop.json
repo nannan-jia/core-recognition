@@ -1,0 +1,120 @@
+{
+  "image": "ZK1024A-1.jpg",
+  "source": "C:/Users/Nan/Documents/GitHub/Core_recognition/Fracture/api_uploads/cf3c9f3c1e89/ZK1024A-1.jpg",
+  "row_count": 3,
+  "container_count": 1,
+  "status": "ok",
+  "detection": {
+    "method": "template_grid_score:grid_score+hdr:blue_end",
+    "confidence": 0.7597,
+    "estimated_rows": 3,
+    "mid_seam_y": null,
+    "scores_by_row_count": {
+      "3": 1.985,
+      "5": 1.264,
+      "4": 1.173
+    },
+    "divider_ys": [
+      180,
+      652,
+      1108,
+      1581
+    ],
+    "title_y": 79
+  },
+  "image_size": {
+    "width": 4032,
+    "height": 1587
+  },
+  "groove_width_px": 3949,
+  "pitch_px": 467,
+  "pitch_over_width": 0.1183,
+  "target_pw": null,
+  "row_aspect_w_over_h": 10.76,
+  "inner_box": {
+    "left": 0.009673,
+    "top": 0.113422,
+    "right": 0.989087,
+    "bottom": 0.996219
+  },
+  "inner_box_px": {
+    "left": 39,
+    "top": 180,
+    "right": 3988,
+    "bottom": 1581,
+    "width": 3949,
+    "height": 1401,
+    "left_norm": 0.009673,
+    "top_norm": 0.113422,
+    "right_norm": 0.989087,
+    "bottom_norm": 0.996219
+  },
+  "box_bbox": {
+    "x": 39,
+    "y": 180,
+    "w": 3949,
+    "h": 1401
+  },
+  "rows": [
+    {
+      "index": 1,
+      "output_file": "row_01.jpg",
+      "y_top": 0.115942,
+      "y_bottom": 0.347196,
+      "x_left": 0.009673,
+      "x_right": 0.989087,
+      "crop_box": {
+        "left": 39,
+        "top": 184,
+        "right": 3988,
+        "bottom": 551,
+        "width": 3949,
+        "height": 367,
+        "left_norm": 0.009673,
+        "top_norm": 0.115942,
+        "right_norm": 0.989087,
+        "bottom_norm": 0.347196
+      }
+    },
+    {
+      "index": 2,
+      "output_file": "row_02.jpg",
+      "y_top": 0.412728,
+      "y_bottom": 0.63075,
+      "x_left": 0.009673,
+      "x_right": 0.989087,
+      "crop_box": {
+        "left": 39,
+        "top": 655,
+        "right": 3988,
+        "bottom": 1001,
+        "width": 3949,
+        "height": 346,
+        "left_norm": 0.009673,
+        "top_norm": 0.412728,
+        "right_norm": 0.989087,
+        "bottom_norm": 0.63075
+      }
+    },
+    {
+      "index": 3,
+      "output_file": "row_03.jpg",
+      "y_top": 0.697543,
+      "y_bottom": 0.931317,
+      "x_left": 0.009673,
+      "x_right": 0.989087,
+      "crop_box": {
+        "left": 39,
+        "top": 1107,
+        "right": 3988,
+        "bottom": 1478,
+        "width": 3949,
+        "height": 371,
+        "left_norm": 0.009673,
+        "top_norm": 0.697543,
+        "right_norm": 0.989087,
+        "bottom_norm": 0.931317
+      }
+    }
+  ]
+}

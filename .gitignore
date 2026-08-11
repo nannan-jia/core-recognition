@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+.env.*
+
+# Logs
+*.log
+
+# Accidental empty folder from GitHub Desktop mis-init (safe to delete when unlocked)
+recognition/
+
+# Pipeline outputs (regenerable)
+output/
+
+# Large sample images (keep crop.json if present)
+input/**/*.jpg
+input/**/*.jpeg
+input/**/*.png
+input/**/*.tif
+input/**/*.tiff
