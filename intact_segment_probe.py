@@ -39,6 +39,9 @@ MIN_GAP_SEP = 80
 SPAN_MIN = 0.38
 # 相对邻域更暗
 PROM_MIN = 10.0
+# 段内连通域：丢掉相对主块过小、或与主块水平方向明显分离的游离碎块
+MIN_CC_AREA_FRAC = 0.25
+MIN_CC_X_OVERLAP = 0.35
 
 
 def distractor_mask(bgr: np.ndarray) -> np.ndarray:
@@ -250,6 +253,106 @@ def intervals_between(width: int, gaps: list[tuple[int, int]]) -> list[tuple[int
     return out
 
 
+def keep_primary_components(
+    mask: np.ndarray,
+    min_area_frac: float = MIN_CC_AREA_FRAC,
+    min_x_overlap: float = MIN_CC_X_OVERLAP,
+) -> np.ndarray:
+    """只保留主岩块：面积够大，且与最大块在水平方向有足够重叠。
+
+    避免「长完整段 + 断口后侧向分离的一小段」被同一颜色盖住。
+    """
+    n, labels, stats, _ = cv2.connectedComponentsWithStats(mask, connectivity=8)
+    if n <= 2:
+        return mask
+
+    areas = stats[1:, cv2.CC_STAT_AREA]
+    main_i = int(np.argmax(areas)) + 1
+    max_area = int(stats[main_i, cv2.CC_STAT_AREA])
+    thr = max(1, int(max_area * min_area_frac))
+
+    main_l = int(stats[main_i, cv2.CC_STAT_LEFT])
+    main_r = main_l + int(stats[main_i, cv2.CC_STAT_WIDTH])
+
+    keep = np.zeros_like(mask)
+    for lab in range(1, n):
+        area = int(stats[lab, cv2.CC_STAT_AREA])
+        if lab != main_i and area < thr:
+            continue
+        if lab == main_i:
+            keep[labels == lab] = 255
+            continue
+        l = int(stats[lab, cv2.CC_STAT_LEFT])
+        r = l + int(stats[lab, cv2.CC_STAT_WIDTH])
+        overlap = max(0, min(main_r, r) - max(main_l, l))
+        ref = max(1, min(main_r - main_l, r - l))
+        if overlap / ref >= min_x_overlap:
+            keep[labels == lab] = 255
+    return keep
+
+
+def trim_to_solid_span(
+    mask: np.ndarray,
+    ref: np.ndarray | None = None,
+    min_cov: float = 0.20,
+    min_run: int = 20,
+    min_valley: int = 8,
+) -> np.ndarray:
+    """按列覆盖保留主实心跨度。
+
+    优先用 ref（CLOSE 前的原始岩体）找断口低谷并切断，避免细桥把尾部小尖粘回来。
+    """
+    if mask.size == 0 or not np.any(mask):
+        return mask
+    src = ref if ref is not None else mask
+    cov = (src > 0).mean(axis=0).astype(np.float32)
+    w = len(cov)
+
+    def longest_run(thr: float) -> tuple[int, int] | None:
+        best = None
+        j = 0
+        while j < w:
+            if cov[j] < thr:
+                j += 1
+                continue
+            a = j
+            while j < w and cov[j] >= thr:
+                j += 1
+            if best is None or j - a > best[0]:
+                best = (j - a, a, j)
+        if best is None:
+            return None
+        return best[1], best[2]
+
+    # 从左扫：进入实心段后，遇到足够宽的低谷则切断（丢掉其后游离小尖）
+    i = 0
+    while i < w and cov[i] < min_cov:
+        i += 1
+    solid_start = i
+    cut = None
+    while i < w:
+        if cov[i] >= min_cov:
+            i += 1
+            continue
+        v0 = i
+        while i < w and cov[i] < min_cov:
+            i += 1
+        if i - v0 >= min_valley and (v0 - solid_start) >= min_run:
+            cut = v0
+            break
+    if cut is None:
+        span = longest_run(min_cov)
+        if span is None:
+            span = longest_run(0.05)
+        if span is None:
+            return mask
+        solid_start, cut = span
+
+    out = np.zeros_like(mask)
+    out[:, solid_start:cut] = mask[:, solid_start:cut]
+    return keep_primary_components(out)
+
+
 def segment_mask_in_interval(
     gray: np.ndarray,
     distract: np.ndarray,
@@ -264,15 +367,25 @@ def segment_mask_in_interval(
     mask = np.zeros((h, w), np.uint8)
     roi = gray[y0:y1, x0:x1]
     dist = distract[y0:y1, x0:x1]
-    rock = ((roi >= black_thr) & (dist == 0)).astype(np.uint8) * 255
+    raw = ((roi >= black_thr) & (dist == 0)).astype(np.uint8) * 255
     # 填小洞，成近似圆柱面
     rock = cv2.morphologyEx(
-        rock, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7)), iterations=2
+        raw, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7)), iterations=2
     )
     rock = cv2.morphologyEx(
         rock, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3))
     )
-    mask[y0:y1, x0:x1] = rock
+    # 腐蚀打断细桥，只留主连通域再有限恢复；再用原始列覆盖剪掉断口后小尖
+    neck_k = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    eroded = cv2.erode(rock, neck_k, iterations=1)
+    primary = keep_primary_components(eroded)
+    restored = cv2.bitwise_and(cv2.dilate(primary, neck_k, iterations=1), rock)
+    restored = cv2.morphologyEx(
+        restored, cv2.MORPH_OPEN, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
+    )
+    restored = keep_primary_components(restored)
+    restored = trim_to_solid_span(restored, ref=raw)
+    mask[y0:y1, x0:x1] = restored
     return mask
 
 
@@ -289,14 +402,20 @@ def classify_interval(
     img_w: int,
 ) -> dict | None:
     core_h = y1 - y0
-    width = x1 - x0
+    # 用实际岩体 mask 收紧左右界，避免把断口后游离小块算进完整段宽度
+    cols = np.where(mask[y0:y1, x0:x1].any(axis=0))[0]
+    if cols.size == 0:
+        return None
+    x0k = x0 + int(cols.min())
+    x1k = x0 + int(cols.max()) + 1
+    width = x1k - x0k
     if width < int(img_w * MIN_SEG_WIDTH_FRAC):
         return None
 
-    roi_gray = gray[y0:y1, x0:x1]
-    roi_mask = mask[y0:y1, x0:x1] > 0
+    roi_gray = gray[y0:y1, x0k:x1k]
+    roi_mask = mask[y0:y1, x0k:x1k] > 0
     if roi_mask.mean() < 0.25:
-        return {"kind": "fragment", "x0": x0, "x1": x1, "y0": y0, "y1": y1, "mask": mask}
+        return {"kind": "fragment", "x0": x0k, "x1": x1k, "y0": y0, "y1": y1, "mask": mask}
 
     black_frac = float((roi_gray < black_thr).mean())
     white_frac = float(((roi_gray >= white_thr) & roi_mask).sum() / max(roi_mask.sum(), 1))
@@ -317,8 +436,8 @@ def classify_interval(
     kind = "intact" if looks_intact else "fragment"
     return {
         "kind": kind,
-        "x0": x0,
-        "x1": x1,
+        "x0": x0k,
+        "x1": x1k,
         "y0": y0,
         "y1": y1,
         "width": width,
