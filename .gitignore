@@ -25,9 +25,5 @@ recognition/
 # Pipeline outputs (regenerable)
 output/
 
-# Large sample images (keep crop.json if present)
-input/**/*.jpg
-input/**/*.jpeg
-input/**/*.png
-input/**/*.tif
-input/**/*.tiff
+# Local sample data (do not upload)
+input/
